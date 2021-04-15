@@ -2,9 +2,6 @@
 
 # If editing from Windows. Choose LF as line-ending
 
-# This removes all pods that are evicted in a specific namespace or all
-# namespaces.
-
 set -eu
 
 # Find out where dependent modules are and load them at once before doing

@@ -2,6 +2,11 @@
 # see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
 # for examples
 
+# Source global definitions, distros like to place these little here and
+# there...
+if [ -f /etc/bashrc ]; then
+        . /etc/bashrc
+fi
 if [ -f /etc/bash.bashrc ]; then
     source /etc/bash.bashrc
 fi
@@ -160,3 +165,15 @@ if ! shopt -oq posix; then
     . /etc/bash_completion
   fi
 fi
+
+# User specific aliases and functions. We don't use this for the time being, but
+# it's a good idea coming from fedora.
+if [ -d ~/.bashrc.d ]; then
+        for rc in ~/.bashrc.d/*; do
+                if [ -f "$rc" ]; then
+                        . "$rc"
+                fi
+        done
+fi
+
+unset rc

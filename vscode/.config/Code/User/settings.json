@@ -1,4 +1,27 @@
 {
     "workbench.colorTheme": "Nord",
-    "editor.fontSize": 12
+    "editor.fontSize": 11,
+    "editor.lineHeight": 11,
+    "editor.fontFamily": "'Hack', 'Input', 'Droid Sans Mono', 'monospace', monospace, 'Droid Sans Fallback'",
+    "git.autofetch": true,
+    // Configure file associations to languages (e.g. "*.extension": "html"). These have precedence over the default associations of the languages installed.
+    "files.associations": {
+        "*.tm": "tcl",
+        "*.test": "tcl",
+        "Caddyfile": "caddyfile"
+    },
+    "diffEditor.ignoreTrimWhitespace": false,
+    "window.zoomLevel": 0,
+    "editor.fontLigatures": true,
+    "telemetry.enableTelemetry": false,
+    "terminal.integrated.fontSize": 11,
+    "explorer.confirmDelete": false,
+    "markdown-toc.depthFrom": 2,
+    "shellcheck.disableVersionCheck": true,
+    "editor.rulers": [
+        80
+    ],
+    "window.titleBarStyle": "custom",
+    "scm.alwaysShowRepositories": true,
+    "editor.tabSize": 2
 }

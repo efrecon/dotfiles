@@ -209,7 +209,7 @@ install() {
     if printf %s\\n "$INSTALLED" | grep -vq $(basename "$tool_path") && install_tool "$tool_path"; then
       INSTALLED="${INSTALLED}\n$(basename $tool_path)"
     fi
-  done  
+  done
 }
 
 # Compute the location of backups for this run

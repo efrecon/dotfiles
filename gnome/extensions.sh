@@ -10,3 +10,8 @@ find  "${HOME}/.local/share/gnome-shell/extensions" \
 # Push back the settings from the repo file. This file has to be regenerated
 # everytime some settings, in some extension, change.
 dconf load /org/gnome/shell/extensions/ < "${EXT_ROOTDIR}/extensions.dconf"
+
+# Extensions that have been copied into their official locations are disabled by
+# default, this will enable them...
+gnome-extensions list --disabled --user |
+      xargs -r -I '{}' gnome-extensions enable \{\}

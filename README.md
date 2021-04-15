@@ -11,13 +11,13 @@ The organisation of the repository and its dot files is as follows:
 * There should be one sub-directory per recognised tool under the root directory
   of this repository. The installer will recursively copy all files under that
   directory to your home directory, unless the following rule match.
-* Under the `distro` sub-directory, there should be as many distro specific
-  directories as necessary, e.g. `ubuntu` or `darwin`. Distribution names are
-  always in lowercase. Under those distribution specific sub-directories, there
-  can be as many sub-directories as necessary and these will work as the tools
-  directories described above. Whenever files for a given tools have been copied
-  from a distribution specific directory, they will **not** be copied from the
-  set of generic directories.
+* Under the [`distro`](./distro) sub-directory, there should be as many distro
+  specific directories as necessary, e.g. `ubuntu` or `darwin`. Distribution
+  names are always in lowercase. Under those distribution specific
+  sub-directories, there can be as many sub-directories as necessary and these
+  will work as the tools directories described above. Whenever files for a given
+  tools have been copied from a distribution specific directory, they will
+  **not** be copied from the set of generic directories.
 
 ## Examples
 

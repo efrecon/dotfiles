@@ -26,6 +26,11 @@ code --install-extension timonwong.shellcheck
 code --install-extension bkromhout.vscode-tcl
 code --install-extension shardulm94.trailing-spaces
 code --install-extension redhat.vscode-yaml
+code --install-extension pkief.material-icon-theme
+code --install-extension donjayamanne.githistory
+code --install-extension aaron-bond.better-comments
+code --install-extension johnpapa.vscode-peacock
+code --install-extension ms-kubernetes-tools.vscode-kubernetes-tools
 
 # Themes
 code --install-extension arcticicestudio.nord-visual-studio-code

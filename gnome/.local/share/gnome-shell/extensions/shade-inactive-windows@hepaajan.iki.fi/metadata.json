@@ -7,7 +7,9 @@
     "3.6", 
     "3.8", 
     "3.10", 
-    "3.12"
+    "3.12",
+    "3.38",
+    "40"
   ], 
   "url": "https://github.com/hepaajan/shade-inactive-windows", 
   "uuid": "shade-inactive-windows@hepaajan.iki.fi", 

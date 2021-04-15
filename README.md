@@ -4,13 +4,16 @@ This repository contains a set of opinionated dotfiles, organised in
 directories, one per tool. You are welcome to use those files, but might mostly
 be interested in the installer. The installer is able to copy a specific set of
 files for a given distribution, and will automatically backup existing files
-before overwriting them.
+before overwriting them. In addition, when relevant, the installer is also able
+to delegate installation procedures per tool, if necessary.
 
 The organisation of the repository and its dot files is as follows:
 
 * There should be one sub-directory per recognised tool under the root directory
-  of this repository. The installer will recursively copy all files under that
-  directory to your home directory, unless the following rule match.
+  of this repository. The installer will recursively copy all dot
+  files/directories under that directory to your home directory, unless the
+  following rule match. In addition, any executable file matching `*.sh` will be
+  executed. This enables tool-specific installation procedures.
 * Under the [`distro`](./distro) sub-directory, there should be as many distro
   specific directories as necessary, e.g. `ubuntu` or `darwin`. Distribution
   names are always in lowercase. Under those distribution specific

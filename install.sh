@@ -49,6 +49,14 @@ INSTALL_BACKUP=${INSTALL_BACKUP:-"${HOME%/}/.backup"}
 # Date format string to generate the backup directory names under the root
 INSTALL_BACKFMT=${INSTALL_BACKFMT:-"%Y%m%d-%H%M%S"}
 
+# Glob-style pattern of files and directories that will be considered for
+# copying to the target directory, from the tools directories.
+INSTALL_DOTFILES=${INSTALL_DOTFILES:-".*"}
+
+# Glob-style pattern of executables that will be considered for running from the
+# within the tools directories when installing.
+INSTALL_EXEFILES=${INSTALL_EXEFILES:-"*.sh"}
+
 # shellcheck disable=2034 # Usage string is used by log module on errors
 EFSL_USAGE="
 Synopsis:
@@ -146,14 +154,23 @@ install_tool() {
     # this run (this directory will have a unique name across time (and runs))
     if [ -n "$INSTALL_BACKDIR" ]; then
       log_info "Backing up existing versions of $tool to $INSTALL_BACKDIR"
-      find "$1" -mindepth 1 -maxdepth 1 |
+      find "$1" -mindepth 1 -maxdepth 1 -name "$INSTALL_DOTFILES" |
         xargs -r -I '{}' basename \{\} |
         xargs -r -I '{}' cp -a "${INSTALL_TARGET%/}/{}" "$INSTALL_BACKDIR"
     fi
     # Now Recursively copy all the files that are under the tool's directory
     # into the target directory.
     log_notice "Installing $tool from $1 to $INSTALL_TARGET"
-    find "$1" -mindepth 1 -maxdepth 1 -exec cp -a "{}" "$INSTALL_TARGET" \;
+    find "$1" -mindepth 1 -maxdepth 1 -name "$INSTALL_DOTFILES" \
+              -exec cp -a "{}" "$INSTALL_TARGET" \;
+    # And then time for the most dangerous operation: execute any installation
+    # helper that would be present in the directory.
+    exe=$(find "$1" -mindepth 1 -maxdepth 1 -executable -type f -name "$INSTALL_EXEFILES")
+    if [ -n "$exe" ]; then
+      log_info "Running installation helpers for $tool from $1"
+      find "$1" -mindepth 1 -maxdepth 1 -executable -type f -name "$INSTALL_EXEFILES" \
+                -exec \{\} \;
+    fi
   else
     # Just printout what would be done. This code is similar to the one above,
     # apart from the additional "echo". It should be kept in sync, in order to
@@ -163,14 +180,23 @@ install_tool() {
     if [ -n "$INSTALL_BACKDIR" ]; then
       log_info "Would backup existing versions of $tool to $INSTALL_BACKDIR"
       if at_verbosity trace; then
-        find "$1" -mindepth 1 -maxdepth 1 |
+        find "$1" -mindepth 1 -maxdepth 1 -name "$INSTALL_DOTFILES" |
           xargs -r -I '{}' basename \{\} |
           xargs -r -I '{}' echo cp -a "${INSTALL_TARGET%/}/{}" "$INSTALL_BACKDIR" >&2
       fi
     fi
     log_info "Would install $tool from $1 to $INSTALL_TARGET"
     if at_verbosity trace; then
-      find "$1" -mindepth 1 -maxdepth 1 -exec echo cp -a "{}" "$INSTALL_TARGET" >&2 \;
+      find "$1" -mindepth 1 -maxdepth 1 -name "$INSTALL_DOTFILES" \
+                -exec echo cp -a "{}" "$INSTALL_TARGET" >&2 \;
+    fi
+    exe=$(find "$1" -mindepth 1 -maxdepth 1 -executable -type f -name "$INSTALL_EXEFILES")
+    if [ -n "$exe" ]; then
+      log_info "Would execute installation helpers for $tool from $1"
+      if at_verbosity trace; then
+        find "$1" -mindepth 1 -maxdepth 1 -executable -type f -name "$INSTALL_EXEFILES" \
+                  -exec echo \{\} >&2 \;
+      fi
     fi
   fi
 }

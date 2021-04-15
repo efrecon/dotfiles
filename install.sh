@@ -188,14 +188,14 @@ install_tool() {
     log_info "Would install $tool from $1 to $INSTALL_TARGET"
     if at_verbosity trace; then
       find "$1" -mindepth 1 -maxdepth 1 -name "$INSTALL_DOTFILES" \
-                -exec echo cp -a "{}" "$INSTALL_TARGET" >&2 \;
+                -exec echo cp -a "{}" "$INSTALL_TARGET" \; >&2
     fi
     exe=$(find "$1" -mindepth 1 -maxdepth 1 -executable -type f -name "$INSTALL_EXEFILES")
     if [ -n "$exe" ]; then
       log_info "Would execute installation helpers for $tool from $1"
       if at_verbosity trace; then
         find "$1" -mindepth 1 -maxdepth 1 -executable -type f -name "$INSTALL_EXEFILES" \
-                  -exec echo \{\} >&2 \;
+                  -exec echo \{\} \; >&2
       fi
     fi
   fi

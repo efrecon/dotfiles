@@ -40,9 +40,6 @@ module log controls
 # Target Diretory
 INSTALL_TARGET=${INSTALL_TARGET:-"$HOME"}
 
-# Tools to install
-INSTALL_TOOLS=${INSTALL_TOOLS:-"*"}
-
 # Do nothing, just print out what would be done
 INSTALL_DRYRUN=${INSTALL_DRYRUN:-0}
 
@@ -58,26 +55,23 @@ Synopsis:
   Install dotfiles into home directory
 
 Usage:
-  $EFSL_CMDNAME [-option arg]...
+  $EFSL_CMDNAME [-option arg] [--] [tool]...
   where all dash-led single options are as follows:
-    --target         Target directory, default to \$HOME
-    -t | --tools     Extended regular expression matching the tools
-                     to install (defaults to .*)
+    -t | --target    Target directory, default to \$HOME
     -v | --verbosity One of: error, warn, notice, info, debug or trace
+  
+  All arguments (possibly after the double-dash separator) will be
+  patterns passed to find and matching known tools to install. The
+  behaviour is to install ALL known tools when no argument is passed!
 "
 
 # Parse options
 while [ $# -gt 0 ]; do
   case "$1" in
-    --target)
+    -t | --target)
       INSTALL_TARGET=$2; shift 2;;
     --target=*)
       INSTALL_TARGET="${1#*=}"; shift 1;;
-
-    -t | --tool | --tools)
-      INSTALL_TOOLS=$2; shift 2;;
-    --tool=* | --tools=*)
-      INSTALL_TOOLS="${1#*=}"; shift 1;;
 
     --dry-run | --dryrun)
       INSTALL_DRYRUN=1; shift 1;;
@@ -118,20 +112,26 @@ distro() {
   fi
 }
 
-# Prints out the list of tools in the distribution-specific directory.
-# Hopefully, this list should be empty to allow for the same environment on all
-# destination machines.
+# Prints out the list of tools in the distribution-specific directory (all or
+# the one matching the patter passed as a parameter). Hopefully, this list
+# should be empty to allow for the same environment on all destination machines.
 distro_tools() {
   if [ -d "${INSTALL_ROOTDIR}/distro/$(distro)" ]; then
-    find "${INSTALL_ROOTDIR}/distro/$(distro)" -mindepth 1 -maxdepth 1 -type d -name "${INSTALL_TOOLS}"
+    find "${INSTALL_ROOTDIR}/distro/$(distro)" -mindepth 1 -maxdepth 1 -type d -name "${1:-*}"
   fi
 }
 
 # Prints out the list of generic tools, apart for those that require
-# distribution-specific tweaks.
+# distribution-specific tweaks, matching the pattern passed as a parameter (or
+# all)
 tools() {
-  find "${INSTALL_ROOTDIR}" -mindepth 1 -maxdepth 1 -type d -name "${INSTALL_TOOLS}" |
-    grep -vE '/(lib|distro)$'
+  # Note that the grep jumps over: the distro directory because this is where we
+  # store distribution specific sub-directories for tools, the lib directory
+  # because this is where we store some of our code (libraries), and any
+  # directory that would start with a dot . (to avoid the git directory itself
+  # for this repo itself).
+  find "${INSTALL_ROOTDIR}" -mindepth 1 -maxdepth 1 -type d -name "${1:-*}" |
+    grep -vE '/(lib|distro|\..*)$'
 }
 
 # Install the tool which path is passed as an argument to the target directory.
@@ -201,17 +201,39 @@ INSTALLED=
 # Install the distribution specific tools. If these have been installed, they
 # won't be installed from the set of generic tools. This allows to override the
 # installation of some tool for specific platforms.
-if [ -n "$(distro_tools)" ]; then
-  install<<EOF
+if [ "$#" = "0" ]; then
+  if [ -n "$(distro_tools)" ]; then
+    install<<EOF
 $(distro_tools)
 EOF
+  fi
+else
+  for ptn in "$@"; do
+    if [ -n "$(distro_tools "$ptn")" ]; then
+      install<<EOF
+$(distro_tools "$ptn")
+EOF
+    fi
+  done
 fi
 
 # Now install all tools that wouldn't have been installed from their
 # distribution specific directory into the target dir.
-install<<EOF
+if [ "$#" = "0" ]; then
+  if [ -n "$(tools)" ]; then
+    install<<EOF
 $(tools)
 EOF
+  fi
+else
+  for ptn in "$@"; do
+    if [ -n "$(tools "$ptn")" ]; then
+      install<<EOF
+$(tools "$ptn")
+EOF
+    fi
+  done
+fi
 
 # Print out the list of tools that were installed
 printf "$INSTALLED"|tr '\n' " "|cut -c 2-

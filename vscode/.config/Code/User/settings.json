@@ -23,5 +23,6 @@
     ],
     "window.titleBarStyle": "custom",
     "scm.alwaysShowRepositories": true,
-    "editor.tabSize": 2
+    "editor.tabSize": 2,
+    "workbench.iconTheme": "material-icon-theme"
 }

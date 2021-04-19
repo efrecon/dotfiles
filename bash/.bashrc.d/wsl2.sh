@@ -1,6 +1,5 @@
 #!/usr/bin/env sh
 
-echo "Running wsl2 tweaks"
 if uname -r | grep -q WSL2; then
     # Start docker daemon if not already running.
     service docker status > /dev/null || sudo service docker start

@@ -166,6 +166,13 @@ if ! shopt -oq posix; then
   fi
 fi
 
+# Install krew
+if [ -z "$KREW_ROOT" ]; then
+	export PATH=${KREW_ROOT}:$PATH
+elif [ -d "$HOME/.krew" ]; then
+	export PATH=${HOME}/.krew/bin:$PATH
+fi
+
 # User specific aliases and functions. We don't use this for the time being, but
 # it's a good idea coming from fedora.
 if [ -d ~/.bashrc.d ]; then

@@ -154,14 +154,14 @@ install_tool() {
     # this run (this directory will have a unique name across time (and runs))
     if [ -n "$INSTALL_BACKDIR" ]; then
       log_info "Backing up existing versions of $tool to $INSTALL_BACKDIR"
-      find "$1" -mindepth 1 -maxdepth 1 -name "$INSTALL_DOTFILES" |
+      find "$1" -mindepth 1 -maxdepth 1 \( -name "$INSTALL_DOTFILES" -o -type d \) |
         xargs -r -I '{}' basename \{\} |
         xargs -r -I '{}' cp -a "${INSTALL_TARGET%/}/{}" "$INSTALL_BACKDIR"
     fi
     # Now Recursively copy all the files that are under the tool's directory
     # into the target directory.
     log_notice "Installing $tool from $1 to $INSTALL_TARGET"
-    find "$1" -mindepth 1 -maxdepth 1 -name "$INSTALL_DOTFILES" \
+    find "$1" -mindepth 1 -maxdepth 1 \( -name "$INSTALL_DOTFILES" -o -type d \) \
               -exec cp -a "{}" "$INSTALL_TARGET" \;
     # And then time for the most dangerous operation: execute any installation
     # helper that would be present in the directory.
@@ -180,14 +180,14 @@ install_tool() {
     if [ -n "$INSTALL_BACKDIR" ]; then
       log_info "Would backup existing versions of $tool to $INSTALL_BACKDIR"
       if at_verbosity trace; then
-        find "$1" -mindepth 1 -maxdepth 1 -name "$INSTALL_DOTFILES" |
+        find "$1" -mindepth 1 -maxdepth 1 \( -name "$INSTALL_DOTFILES" -o -type d \) |
           xargs -r -I '{}' basename \{\} |
           xargs -r -I '{}' echo cp -a "${INSTALL_TARGET%/}/{}" "$INSTALL_BACKDIR" >&2
       fi
     fi
     log_info "Would install $tool from $1 to $INSTALL_TARGET"
     if at_verbosity trace; then
-      find "$1" -mindepth 1 -maxdepth 1 -name "$INSTALL_DOTFILES" \
+      find "$1" -mindepth 1 -maxdepth 1 \( -name "$INSTALL_DOTFILES" -o -type d \) \
                 -exec echo cp -a "{}" "$INSTALL_TARGET" \; >&2
     fi
     exe=$(find "$1" -mindepth 1 -maxdepth 1 -executable -type f -name "$INSTALL_EXEFILES")

@@ -7,20 +7,23 @@ files for a given distribution, and will automatically backup existing files
 before overwriting them. In addition, when relevant, the installer is also able
 to delegate installation procedures per tool, if necessary.
 
-The organisation of the repository and its dot files is as follows:
+Each tool is represented by a set of files and/or directories in a sub-directory
+of this repository (see below). The name of that directory is the name of the
+tool, a name that can be used for partial installations. Example names are `git`
+or `vscode`. For a given tool, thus sub-directory, and at installation time, all
+files starting with a dot `.` and all sub-directories will be (recursively)
+copied to the target directory, i.e. often your `$HOME` directory. In addition,
+any executable file matching `*.sh` will be executed. This enables tool-specific
+installation procedures.
 
-* There should be one sub-directory per recognised tool under the root directory
-  of this repository. The installer will recursively copy all dot
-  files/directories under that directory to your home directory, unless the
-  following rule match. In addition, any executable file matching `*.sh` will be
-  executed. This enables tool-specific installation procedures.
-* Under the [`distro`](./distro) sub-directory, there should be as many distro
-  specific directories as necessary, e.g. `ubuntu` or `darwin`. Distribution
-  names are always in lowercase. Under those distribution specific
-  sub-directories, there can be as many sub-directories as necessary and these
-  will work as the tools directories described above. Whenever files for a given
-  tools have been copied from a distribution specific directory, they will
-  **not** be copied from the set of generic directories.
+There are two possible origins for the sub-directories regrouping installation
+files for a given tool. Under the [`distro`](./distro) sub-directory, there
+should be as many distro specific directories as necessary, e.g. `ubuntu` or
+`darwin`. Distribution names are always in lowercase. If a tool is found there, files, directories and executables will be taken from the distribution-specific directory. If not, a "generic" installation will be looked for under the root of this repository. This is the most common case!
+
+There are two reserved names that cannot be used for the tools: the name of the
+distribution specific sub-directory [`distro`](./distro/) and the
+[`lib`](./lib/) at the root.
 
 ## Examples
 

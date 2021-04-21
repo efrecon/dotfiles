@@ -31,6 +31,9 @@ code --install-extension donjayamanne.githistory
 code --install-extension aaron-bond.better-comments
 code --install-extension johnpapa.vscode-peacock
 code --install-extension ms-kubernetes-tools.vscode-kubernetes-tools
+code --install-extension rogalmic.bash-debug
+code --install-extension mads-hartmann.bash-ide-vscode
+code --install-extension foxundermoon.shell-format
 
 # Themes
 code --install-extension arcticicestudio.nord-visual-studio-code

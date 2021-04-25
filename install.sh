@@ -107,10 +107,10 @@ done
 distro() {
   if [ "$(uname)" = "Darwin" ]; then
     printf darwin\\n
-  elif [ "$(expr substr $(uname -s) 1 10)" = "MINGW32_NT" ] \
-        || [ "$(expr substr $(uname -s) 1 10)" = "MINGW64_NT" ]; then
+  elif [ "$(expr substr "$(uname -s)" 1 10)" = "MINGW32_NT" ] \
+        || [ "$(expr substr "$(uname -s)" 1 10)" = "MINGW64_NT" ]; then
     printf mingw\\n
-  elif [ "$(expr substr $(uname -s) 1 5)" = "Linux" ]; then
+  elif [ "$(expr substr "$(uname -s)" 1 5)" = "Linux" ]; then
     if [ -r /etc/os-release ]; then
       # shellcheck disable=SC1091
       (. /etc/os-release && echo "$ID" | tr '[:upper:]' '[:lower:]')
@@ -139,7 +139,7 @@ tools() {
   # directory that would start with a dot . (to avoid the git directory itself
   # for this repo itself).
   find "${INSTALL_ROOTDIR}" -mindepth 1 -maxdepth 1 -type d -name "${1:-*}" |
-    grep -vE '/(lib|distro|\..*)$'
+    grep -vE '/(lib.*|distro|\..*)$'
 }
 
 # Install the tool which path is passed as an argument to the target directory.

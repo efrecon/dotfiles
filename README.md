@@ -19,11 +19,14 @@ installation procedures.
 There are two possible origins for the sub-directories regrouping installation
 files for a given tool. Under the [`distro`](./distro) sub-directory, there
 should be as many distro specific directories as necessary, e.g. `ubuntu` or
-`darwin`. Distribution names are always in lowercase. If a tool is found there, files, directories and executables will be taken from the distribution-specific directory. If not, a "generic" installation will be looked for under the root of this repository. This is the most common case!
+`darwin`. Distribution names are always in lowercase. If a tool is found there,
+files, directories and executables will be taken from the distribution-specific
+directory. If not, a "generic" installation will be looked for under the root of
+this repository. This is the most common case!
 
 There are two reserved names that cannot be used for the tools: the name of the
-distribution specific sub-directory [`distro`](./distro/) and the
-[`lib`](./lib/) at the root.
+distribution specific sub-directory [`distro`](./distro/) and all names starting
+with `lib`, such as the [`lib`](./lib/) at the root or [`libexec`](./libexec/).
 
 ## Examples
 

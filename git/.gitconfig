@@ -169,3 +169,8 @@
 
   # It is 2021!
 	defaultBranch = main
+
+[credentials]
+	# Cache credentials for an hour to avoid multiple password entry for https
+	# repos.
+	helper = cache --timeout=3600

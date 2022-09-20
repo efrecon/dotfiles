@@ -183,4 +183,9 @@ if [ -d ~/.bashrc.d ]; then
         done
 fi
 
+# Source liquidprompt if installed and running interactively
+if [[ $- = *i* ]] && [[ -f "${HOME}/.local/bin/liquidprompt" ]]; then
+	source "${HOME}/.local/bin/liquidprompt"
+fi
+
 unset rc

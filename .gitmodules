@@ -4,3 +4,7 @@
 [submodule "libexec/dew"]
 	path = libexec/dew
 	url = https://github.com/efrecon/dew.git
+[submodule "libexec/liquidprompt"]
+	path = libexec/liquidprompt
+	url = https://github.com/nojhan/liquidprompt.git
+	branch = stable

@@ -188,4 +188,8 @@ if [[ $- = *i* ]] && [[ -f "${HOME}/.local/bin/liquidprompt" ]]; then
 	source "${HOME}/.local/bin/liquidprompt"
 fi
 
+# Source ble.sh if installed and running interactively
+XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
+source "${XDG_DATA_HOME}/blesh/ble.sh"
+
 unset rc

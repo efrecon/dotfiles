@@ -183,13 +183,13 @@ if [ -d ~/.bashrc.d ]; then
         done
 fi
 
-# Source liquidprompt if installed and running interactively
-if [[ $- = *i* ]] && [[ -f "${HOME}/.local/bin/liquidprompt" ]]; then
-	source "${HOME}/.local/bin/liquidprompt"
-fi
 
 # Source ble.sh if installed and running interactively
 XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
 source "${XDG_DATA_HOME}/blesh/ble.sh"
 
+# Source liquidprompt if installed and running interactively
+if [[ $- = *i* ]] && [[ -f "${HOME}/.local/bin/starship" ]]; then
+	eval "$(starship init bash)"
+fi
 unset rc

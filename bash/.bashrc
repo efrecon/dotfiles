@@ -113,20 +113,20 @@ function lsd { ls -l --file-type $* | grep /; }
 
 # extract various types of archive files
 function extract {
-	if [[ -z $1 ]]; then
+	if [[ -z "$1" ]]; then
 		echo 'Usage: extract ARCHIVE'
 		echo 'Extract files from ARCHIVE to the current directory'
-	elif [[ -r $1 ]]; then
+	elif [[ -r "$1" ]]; then
 		case $1 in
-			*.rar)      unrar x $1     ;;
-			*.tar)      tar -xvf $1    ;;
-			*.tar.bz2)  tar -xjvf $1   ;;
-			*.bz2)      bzip2 -d $1    ;;
-			*.tar.gz)   tar -xzvf $1   ;;
-			*.gz)       gunzip -d $1   ;;
-			*.tgz)      tar -xzvf $1   ;;
-			*.Z)        uncompress $1  ;;
-			*.zip)      unzip $1       ;;
+			*.rar)      unrar x "$1"     ;;
+			*.tar)      tar -xvf "$1"    ;;
+			*.tar.bz2)  tar -xjvf "$1"   ;;
+			*.bz2)      bzip2 -d "$1"    ;;
+			*.tar.gz)   tar -xzvf "$1"   ;;
+			*.gz)       gunzip -d "$1"   ;;
+			*.tgz)      tar -xzvf "$1"   ;;
+			*.Z)        uncompress "$1"  ;;
+			*.zip)      unzip "$1"       ;;
 
 			*) echo "ERROR: '$1' is not a known archive type"  ;;
 		esac
@@ -141,7 +141,7 @@ function ff {
 		echo 'Usage: ff PATTERN'
 		echo 'Recursively search for a file named PATTERN in the current directory'
 	else
-		find . -type f -iname $1
+		find . -type f -iname "$1"
 	fi
 }
 
@@ -151,7 +151,7 @@ function fd {
 		echo 'Usage: fd PATTERN'
 		echo 'Recursively search for a directory named PATTERN in the current directory'
 	else
-		find . -type d -iname $1
+		find . -type d -iname "$1"
 	fi
 }
 
@@ -183,13 +183,13 @@ if [ -d ~/.bashrc.d ]; then
         done
 fi
 
-# Source liquidprompt if installed and running interactively
-if [[ $- = *i* ]] && [[ -f "${HOME}/.local/bin/liquidprompt" ]]; then
-	source "${HOME}/.local/bin/liquidprompt"
-fi
 
 # Source ble.sh if installed and running interactively
 XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
 source "${XDG_DATA_HOME}/blesh/ble.sh"
 
+# Source liquidprompt if installed and running interactively
+if [[ $- = *i* ]] && [[ -f "${HOME}/.local/bin/starship" ]]; then
+	eval "$("$HOME/.local/bin/starship" init bash)"
+fi
 unset rc

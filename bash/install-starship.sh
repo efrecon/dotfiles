@@ -27,14 +27,13 @@ module() {
 
 module log controls utils
 
-XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
 
-if [ -d "${XDG_DATA_HOME}/blesh" ]; then
-  log_info "ble is already installed."
+# Make XDG bin directory
+if ! [ -d "${HOME}/.local/bin" ]; then
+  mkdir -p "${HOME}/.local/bin"
+fi
+if [ -x "${HOME}/.local/bin/starship" ]; then
+  log_info "starship is already installed."
 else
-  tmp=$(mktemp -d)
-  download https://github.com/akinomyoga/ble.sh/releases/download/nightly/ble-nightly.tar.xz - | tar -C "$tmp" -xJf -
-  mkdir -p "${XDG_DATA_HOME}/blesh"
-  cp -Rf "${tmp}"/ble-nightly/* "${XDG_DATA_HOME}/blesh/"
-  rm -rf "$tmp"
+  download https://starship.rs/install.sh - | sh -s - -f -b "${HOME}/.local/bin"
 fi

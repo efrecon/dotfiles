@@ -1,0 +1,35 @@
+---
+  name: ungit
+
+  on:
+    push:
+
+    pull_request:
+      branches:
+        - main
+        - master
+        - feature/**/main
+        - feature/**/master
+  concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+  jobs:
+    ungit:
+      runs-on: ubuntu-latest
+      name: ungit
+      steps:
+        - name: Checkout
+          uses: actions/checkout@v4
+          with:
+            fetch-depth: 0
+        - name: ungit
+          uses: ./
+          env:
+            UNGIT_INDEX: "-"
+          with:
+            path: __ungit__
+        - name: result
+          shell: bash
+          run: |
+            ls -lRh __ungit__

@@ -167,6 +167,8 @@ install_tool() {
     # helper that would be present in the directory.
     exe=$(find "$1" -mindepth 1 -maxdepth 1 -executable -type f -name "$INSTALL_EXEFILES")
     if [ -n "$exe" ]; then
+      export INSTALL_TARGET; # Pass target directory
+      export EFSL_VERBOSITY; # Pass current verbosity some helpers use log lib
       log_info "Running installation helpers for $tool from $1"
       find "$1" -mindepth 1 -maxdepth 1 -executable -type f -name "$INSTALL_EXEFILES" \
                 -exec \{\} \;

@@ -176,13 +176,12 @@ fi
 # User specific aliases and functions. We don't use this for the time being, but
 # it's a good idea coming from fedora.
 if [ -d ~/.bashrc.d ]; then
-        for rc in ~/.bashrc.d/*; do
-                if [ -f "$rc" ]; then
-                        . "$rc"
-                fi
-        done
+	for rc in ~/.bashrc.d/*; do
+		if [ -f "$rc" ]; then
+			. "$rc"
+		fi
+	done
 fi
-
 
 # Source ble.sh if installed and running interactively
 XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"

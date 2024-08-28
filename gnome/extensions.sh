@@ -1,16 +1,16 @@
 #!/usr/bin/env sh
 
 EXT_ROOTDIR=$( cd -P -- "$(dirname -- "$(command -v -- "$0")")" && pwd -P )
-DOTFILES_ROOTDIR=$(dirname "$EXT_ROOTDIR")
-DOTFILES_LIBPATH=${DOTFILES_LIBPATH:-${DOTFILES_ROOTDIR}/lib}
+INSTALL_ROOTDIR=$(dirname "$EXT_ROOTDIR")
+INSTALL_LIBPATH=${INSTALL_LIBPATH:-${INSTALL_ROOTDIR}/lib}
 
-# Look for modules passed as parameters in the DOTFILES_LIBPATH and source them.
+# Look for modules passed as parameters in the INSTALL_LIBPATH and source them.
 # Modules are required so fail as soon as it was not possible to load a module
 module() {
   for module in "$@"; do
     OIFS=$IFS
     IFS=:
-    for d in $DOTFILES_LIBPATH; do
+    for d in $INSTALL_LIBPATH; do
       if [ -f "${d}/${module}.sh" ]; then
         # shellcheck disable=SC1090
         . "${d}/${module}.sh"
@@ -19,7 +19,7 @@ module() {
       fi
     done
     if [ "$IFS" = ":" ]; then
-      echo "Cannot find module $module in $DOTFILES_LIBPATH !" >& 2
+      echo "Cannot find module $module in $INSTALL_LIBPATH !" >& 2
       exit 1
     fi
   done

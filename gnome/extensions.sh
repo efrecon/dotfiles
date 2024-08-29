@@ -3,6 +3,8 @@
 EXT_ROOTDIR=$( cd -P -- "$(dirname -- "$(command -v -- "$0")")" && pwd -P )
 INSTALL_ROOTDIR=$(dirname "$EXT_ROOTDIR")
 INSTALL_LIBPATH=${INSTALL_LIBPATH:-${INSTALL_ROOTDIR}/lib}
+XDG_DATA_HOME=${XDG_DATA_HOME:-${HOME}/.local/share}
+INSTALL_TARGET=${INSTALL_TARGET:-${XDG_DATA_HOME}/gnome-shell/extensions}
 
 # Look for modules passed as parameters in the INSTALL_LIBPATH and source them.
 # Modules are required so fail as soon as it was not possible to load a module
@@ -30,7 +32,7 @@ if [ -f "${INSTALL_TARGET}/.local/share/gnome-shell/extensions/.unforge" ]; then
       log_info "Extracting extensions indexed at ${INSTALL_TARGET}/.local/share/gnome-shell/extensions/.unforge"
       (
             cd "${INSTALL_TARGET}/.local/share/gnome-shell/extensions"
-            $DOTFILES_ROOTDIR/libexec/unforge/unforge.sh -vv -f install
+            $INSTALL_ROOTDIR/libexec/unforge/unforge.sh -vv -f install -p off
       )
 else
       log_warn "No unforge extension index found at ${INSTALL_TARGET}/.local/share/gnome-shell/extensions/.unforge"

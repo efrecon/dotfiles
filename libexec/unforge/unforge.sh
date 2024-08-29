@@ -20,8 +20,11 @@ UNFORGE_VERBOSE=${UNFORGE_VERBOSE:-0}
 # github.
 UNFORGE_TYPE=${UNFORGE_TYPE:-}
 
-# Default reference to use when none is specified.
-UNFORGE_DEFAULT_REF=${UNFORGE_DEFAULT_REF:-main}
+# Default reference to use when none is specified. Empty (default)
+UNFORGE_DEFAULT_REF=${UNFORGE_DEFAULT_REF:-""}
+
+# Branches for which we resolve to current reference when in git mode
+UNFORGE_GIT_RESOLVE=${UNFORGE_GIT_RESOLVE:-"main master"}
 
 # When >=1 Force overwriting of existing files and directories, when >=2 force
 # redownload of tarball even if in cache.
@@ -97,8 +100,8 @@ while getopts "c:fi:p:r:t:T:vh-" opt; do
       UNFORGE_INDEX=$OPTARG;;
     p) # Protect target directory and files from being changed by making them read-only. Boolean or "auto" (default) to turn on when index is used.
       UNFORGE_PROTECT=$OPTARG;;
-    r) # Set the default reference, main by default
-      UNFORGE_DEFAULT_REF=$OPTARG;;
+    r) # Branches resolved to current reference when in git mode. Default to main and master.
+      UNFORGE_GIT_RESOLVE=$OPTARG;;
     t) # Force the repository type (github or gitlab), empty to autodetect from URL. Defaults to github
       UNFORGE_TYPE=$OPTARG;;
     T) # Set the authentication token to use with the forge
@@ -170,6 +173,11 @@ download() {
   fi
 }
 
+# Understandable string operations...
+unquote() { sed -e 's/^"//' -e 's/"$//'; }
+quoted_string_eol() { grep -sEo -e '"[^"]+"$'; }
+json_string_value() { grep -sEo "\"$1\"\\s*:\\s*\"[^\"]+\"" | quoted_string_eol | unquote; }
+
 # Call download as per the argument and verify that the downloaded file is a
 # gzip file. If not, remove it. Return an error unless there is a (downloaded)
 # gzip file.
@@ -186,6 +194,39 @@ download_gz() {
   fi
 }
 
+
+default_github_branch() {
+  if [ -n "$UNFORGE_TOKEN" ]; then
+    # Add api. in front of the domain name and /repos/ in the path
+    DW_ROOT=$(printf %s\\n "$REPO_URL" | sed -E 's~https://([[:alnum:].]+)/~https://api.\1/repos/~')
+    curl -sSL "${DW_ROOT%/}/branches" --header "Authorization: Bearer $UNFORGE_TOKEN" |
+      json_string_value "name" |
+      head -n 1
+  else
+    curl -sSL "${REPO_URL%/}/branches" |
+      json_string_value "name" |
+      head -n 1
+  fi
+}
+
+
+resolve_github_branch() {
+  if [ -n "$UNFORGE_TOKEN" ]; then
+    # Add api. in front of the domain name and /repos/ in the path
+    DW_ROOT=$(printf %s\\n "$REPO_URL" | sed -E 's~https://([[:alnum:].]+)/~https://api.\1/repos/~')
+    curl -sSL "${DW_ROOT%/}/commits?sha=${REPO_REF}" --header "Authorization: Bearer $UNFORGE_TOKEN" |
+      grep -sEo 'commits/[0-9a-f]{40}' |
+      grep -sEo '[0-9a-f]{40}' |
+      head -n 1
+  else
+    curl -sSL "${REPO_URL%/}/commits/${REPO_REF}/" |
+      grep -sEo 'commit/[0-9a-f]{40}' |
+      grep -sEo '[0-9a-f]{40}' |
+      head -n 1
+  fi
+}
+
+
 # Download the $REPO_URL at the $REPO_REF reference from GitHub. When a token is
 # provided, rewrite the URL to point to the API URL and passed the token.
 download_github_archive() {
@@ -199,6 +240,8 @@ download_github_archive() {
     # from the various possible locations.
     if printf %s\\n "$REPO_REF" | grep -q '^refs/'; then
       download_gz "${REPO_URL%/}/archive/${REPO_REF}.tar.gz" "${1:-}"
+    elif printf %s\\n "$REPO_REF" | grep -qE '^[0-9a-f]{40}'; then
+      download_gz "${REPO_URL%/}/archive/${REPO_REF}.tar.gz" "${1:-}"
     else
       # Consider the reference to be a banch name first, then a tag name, then a
       # pull request, then a commit hash. Note: does not perform any check on
@@ -210,6 +253,43 @@ download_github_archive() {
     fi
   fi
 }
+
+
+default_gitlab_branch() {
+  if [ -n "$UNFORGE_TOKEN" ]; then
+    # Extract the repository name from the URL and the root of the domain.
+    _repo=$(printf %s\\n "$REPO_URL" | sed -E 's~https://([[:alnum:].:]+)/(.*)~\2~')
+    DW_ROOT=$(printf %s\\n "$REPO_URL" | sed -E 's~https://([[:alnum:].:]+)/(.*)~https://\1/~')
+    curl -sSL "${DW_ROOT%/}/api/v4/projects/$(urlencode "$_repo")" --header "Authorization: Bearer $UNFORGE_TOKEN" |
+      json_string_value "default_branch" |
+      head -n 1
+  else
+    curl -sSL "${REPO_URL%/}/-/branches" |
+      grep -Eo 'default-branch-name\s*=\s*"[^"]+"' |
+      quoted_string_eol |
+      unquote |
+      head -n 1
+  fi
+}
+
+
+resolve_gitlab_branch() {
+  if [ -n "$UNFORGE_TOKEN" ]; then
+    # Extract the repository name from the URL and the root of the domain.
+    _repo=$(printf %s\\n "$REPO_URL" | sed -E 's~https://([[:alnum:].:]+)/(.*)~\2~')
+    DW_ROOT=$(printf %s\\n "$REPO_URL" | sed -E 's~https://([[:alnum:].:]+)/(.*)~https://\1/~')
+    curl -sSL "${DW_ROOT%/}/api/v4/projects/$(urlencode "$_repo")/repository/commits?ref_name=${REPO_REF}" --header "PRIVATE-TOKEN: $UNFORGE_TOKEN" |
+      grep -sEo 'commit/[0-9a-f]{40}' |
+      grep -sEo '[0-9a-f]{40}' |
+      head -n 1
+  else
+    curl -sSL "${REPO_URL%/}/-/commits/${REPO_REF}/" |
+      grep -sEo 'tree/[0-9a-f]{40}' |
+      grep -sEo '[0-9a-f]{40}' |
+      head -n 1
+  fi
+}
+
 
 # Download the $REPO_URL at the $REPO_REF reference from GitLab. Rely on
 # GitLab's algorithm for resolving the reference to its real type: banch name,
@@ -285,6 +365,16 @@ relpath() {
   printf %s\\n "${b}${d#"$s"/}"
 }
 
+git_detect() {
+  GITROOT=""
+  GITDIR=$(climb_and_find .git "$1" | head -n 1)
+  if [ -z "$GITDIR" ]; then
+    verbose "Could not find a .git directory in $1"
+  else
+    GITROOT=$(dirname "$GITDIR")
+  fi
+}
+
 # Look up the hierarchy of $1 for a .git directory to be able to turn on "git
 # mode". Set the $GITROOT variable to the root location of the git repository
 # this is called from and adapt the UNFORGE_INDEX if none was specified.
@@ -298,21 +388,17 @@ index_detect() {
   elif [ -z "$UNFORGE_INDEX" ]; then
     UNFORGE_INDEX=$(climb_and_find .unforge "$1" | head -n 1)
     if [ -n "$UNFORGE_INDEX" ]; then
+      git_detect "$(dirname "$UNFORGE_INDEX")"
       verbose "Using $UNFORGE_INDEX as index file"
     else
-      GITDIR=$(climb_and_find .git "$1" | head -n 1)
-      if [ -z "$GITDIR" ]; then
-        verbose "Could not find a .git directory in $1"
-        GITROOT=""
-      else
-        GITROOT=$(dirname "$GITDIR")
-      fi
-
+      git_detect "$1"
       if [ -n "$GITROOT" ]; then
         UNFORGE_INDEX=${GITROOT}/.unforge
         verbose "Using $UNFORGE_INDEX as index file"
       fi
     fi
+  else
+    git_detect "$(dirname "$UNFORGE_INDEX")"
   fi
 
   # Automatically turn target directory protection when applicable. Down from
@@ -360,8 +446,13 @@ index_update() {
 
     # Add the reference to the (new?) repository snapshot, if relevant
     if [ -n "${1:-}" ]; then
-      printf '%s\t%s\n' "$RELATIVE_DEST" "$1" >> "$idx"
-      verbose "Updated index ${UNFORGE_INDEX}: $RELATIVE_DEST -> $1"
+      if [ -n "${2:-}" ]; then
+        printf '%s\t%s\t%s\n' "$RELATIVE_DEST" "$1" "$2" >> "$idx"
+        verbose "Updated index ${UNFORGE_INDEX}: ${RELATIVE_DEST}/$2 <- $1"
+      else
+        printf '%s\t%s\n' "$RELATIVE_DEST" "$1" >> "$idx"
+        verbose "Updated index ${UNFORGE_INDEX}: $RELATIVE_DEST <- $1"
+      fi
     else
       verbose "Removed index entry ${UNFORGE_INDEX}: $RELATIVE_DEST"
     fi
@@ -414,6 +505,7 @@ EOF
         # Read the destination directory and the repository URL from the index.
         DESTDIR=$(printf %s\\n "$line" | awk '{print $1}')
         REPO_URL=$(printf %s\\n "$line" | awk '{print $2}')
+        SUBDIR=$(printf %s\\n "$line" | awk '{print $3}')
         if [ -n "$REPO_URL" ] && [ -n "$DESTDIR" ]; then
           # Compute the full path of the destination directory and call this
           # script again to add the snapshot. Do not replace existing
@@ -421,12 +513,12 @@ EOF
           DESTDIR=${INDEX_DIR}/${DESTDIR}
           if [ -d "$DESTDIR" ]; then
             if [ "$UNFORGE_FORCE" -ge 1 ]; then
-              "$0" add "$REPO_URL" "$DESTDIR"
+              "$0" add "$REPO_URL" "$DESTDIR" "$SUBDIR"
             else
               verbose "Skipping $DESTDIR, already exists. Rerun with at least -f to force"
             fi
           else
-            "$0" add "$REPO_URL" "$DESTDIR"
+            "$0" add "$REPO_URL" "$DESTDIR" "$SUBDIR"
           fi
         fi
       fi
@@ -470,10 +562,29 @@ cmd_add() {
   fi
   shift
 
+  # Decide the repository type when none is specified, detect from the URL.
+  # Enforce the ones we recognise.
+  if [ -z "$UNFORGE_TYPE" ]; then
+    if printf %s\\n "$REPO_URL" | grep -q 'github\.com'; then
+      UNFORGE_TYPE=github
+    elif printf %s\\n "$REPO_URL" | grep -q 'gitlab\.com'; then
+      UNFORGE_TYPE=gitlab
+    else
+      error "Unsupported repository type: $REPO_URL"
+    fi
+  elif ! printf %s\\n "$UNFORGE_TYPE" | grep -qE 'git(hub|lab)'; then
+    error "Unsupported repository type: $UNFORGE_TYPE"
+  fi
+
   # Extract the tag, branch or commit reference as being everything after the @
   REPO_REF=$(printf %s\\n "$REPO_URL" | grep -oE '@.*$' | cut -c 2-)
   if [ -z "$REPO_REF" ]; then
-    REPO_REF=$UNFORGE_DEFAULT_REF
+    if [ -z "$UNFORGE_DEFAULT_REF" ]; then
+      debug "Detecting default branch for $REPO_URL"
+      REPO_REF=$(default_${UNFORGE_TYPE}_branch)
+      verbose "Detected default branch of $REPO_URL to be: $REPO_REF"
+      UNFORGE_DEFAULT_REF=$REPO_REF; # Also remember for clean index output
+    fi
   else
     REPO_URL=$(printf %s\\n "$REPO_URL" | sed 's/@.*$//')
   fi
@@ -490,14 +601,20 @@ cmd_add() {
   # Lookup for a .git directory to be able to turn on "git mode"
   index_detect "$(dirname "$DESTDIR")"
 
-  # Decide the repository type when none is specified, detect from the URL
-  if [ -z "$UNFORGE_TYPE" ]; then
-    if printf %s\\n "$REPO_URL" | grep -q 'github\.com'; then
-      UNFORGE_TYPE=github
-    elif printf %s\\n "$REPO_URL" | grep -q 'gitlab\.com'; then
-      UNFORGE_TYPE=gitlab
-    else
-      error "Unsupported repository type: $REPO_URL"
+  # When inside a git repo, if branch is main, resolve it to its current
+  # reference.
+  if [ -n "$UNFORGE_INDEX" ]; then
+    if printf %s\\n "$UNFORGE_INDEX" | grep -Fq "$GITROOT"; then
+      if printf %s\\n "$UNFORGE_GIT_RESOLVE" | grep -Fq "$REPO_REF"; then
+        debug "Resolving $REPO_REF branch at $UNFORGE_TYPE"
+        ref=$(resolve_${UNFORGE_TYPE}_branch "$REPO_REF")
+        if [ -z "$ref" ]; then
+          warning "Could not resolve $REPO_REF to current commit at $REPO_URL"
+        else
+          verbose "Pinpointed ($UNFORGE_TYPE) $REPO_REF to $ref"
+          REPO_REF=$ref
+        fi
+      fi
     fi
   fi
 
@@ -527,6 +644,17 @@ cmd_add() {
   tar -xzf "${dwdir}/${REPO_NAME}.tar.gz" --strip-component 1 -C "$tardir"
   trace "Extracted ${dwdir}/${REPO_NAME}.tar.gz to $tardir"
 
+  # Decide source directory (inside unpacked tar)
+  if [ -n "${2:-}" ]; then
+    if [ -d "${tardir}/${2#/}" ]; then
+      SRCDIR="${tardir}/${2#/}"
+    else
+      error "Specified sub-directory does not exist inside tar: ${tardir}/${2#/}"
+    fi
+  else
+    SRCDIR=$tardir
+  fi
+
   # Create the destination directory and copy the contents of the tarball to it.
   if [ -d "$DESTDIR" ]; then
     if [ "$UNFORGE_FORCE" -ge 1 ]; then
@@ -541,8 +669,12 @@ cmd_add() {
     fi
   fi
   mkdir -p "${DESTDIR}"
-  tar -C "${tardir}" -cf - . | tar -C "${DESTDIR}" -xf -
-  verbose "Copied snapshot of ${REPO_URL}@${REPO_REF} to ${DESTDIR}"
+  tar -C "$SRCDIR" -cf - . | tar -C "${DESTDIR}" -xf -
+  if [ -n "${2:-}" ]; then
+    verbose "Copied snapshot of ${REPO_URL}@${REPO_REF}/${2#/} to ${DESTDIR}"
+  else
+    verbose "Copied snapshot of ${REPO_URL}@${REPO_REF} to ${DESTDIR}"
+  fi
   tree_protect "$DESTDIR"
 
   # Keep a copy of the tarball in the cache directory if one is specified.
@@ -552,7 +684,11 @@ cmd_add() {
   fi
 
   # Maintain an index of all the snapshots created and from where.
-  index_update "$(forge_url "$REPO_URL" "$REPO_REF")"
+  if [ "$#" -gt 2 ]; then
+    index_update "$(forge_url "$REPO_URL" "$REPO_REF")" "${2#/}"
+  else
+    index_update "$(forge_url "$REPO_URL" "$REPO_REF")"
+  fi
 
   # Cleanup.
   rm -rf "$dwdir" "$tardir"

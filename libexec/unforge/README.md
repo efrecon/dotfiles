@@ -153,9 +153,11 @@ unforge.sh -h
 options:
 
 + `add`: Add a snapshot of the repository passed as a first argument to the
-  directory passed as a second argument (optional). When an index file is to be
-  maintained, it will remember the association. The index file will contain a
-  relative reference to the destination directory.
+  directory passed as a second argument (optional). If a third argument is
+  provided, it should be a sub-directory of the remote directory to extract from
+  (instead of, otherwise, the root). When an index file is to be maintained, it
+  will remember the association. The index file will contain a relative
+  reference to the destination directory.
 + `delete` (or `remove`): Remove the directory passed as an argument. When an
   index file is to be maintained, the association will be lost.
 + `install`: Install snapshots of all repositories pointed out by the index
@@ -200,6 +202,12 @@ implementation script. For an exact list of inputs, consult the
 + When run from within a `git` repository, will automatically use a file called
   `.unforge` at the root of the repository as an index when adding the first time
   -- and unless specified otherwise.
++ When run from within a `git` repository, the `main` and `master` branches will
+  be resolved to their current reference in the `.unforge` index. This freezes
+  the imported code at the current moment in time and avoids problems when
+  updating later. The list of branches to resolve can be changed through the
+  option `-r`. 
++ Automatically detects the default branch of github and gitlab projects.
 + `unforge` will automatically climb up the hierarchy starting from the
   destination directory to look for the `.unforge` index file when adding,
   installing or deleting. This means that while keeping the `.unforge` index

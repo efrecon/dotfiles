@@ -1,7 +1,7 @@
 {
     "workbench.colorTheme": "Nord",
-    "editor.fontSize": 11,
-    "editor.lineHeight": 11,
+    "editor.fontSize": 12,
+    "editor.lineHeight": 12,
     "editor.fontFamily": "'Hack', 'Input', 'Droid Sans Mono', 'monospace', monospace, 'Droid Sans Fallback'",
     "git.autofetch": true,
     // Configure file associations to languages (e.g. "*.extension": "html"). These have precedence over the default associations of the languages installed.
@@ -14,7 +14,7 @@
     "window.zoomLevel": 0,
     "editor.fontLigatures": true,
     "telemetry.enableTelemetry": false,
-    "terminal.integrated.fontSize": 11,
+    "terminal.integrated.fontSize": 12,
     "explorer.confirmDelete": false,
     "markdown-toc.depthFrom": 2,
     "shellcheck.disableVersionCheck": true,

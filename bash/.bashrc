@@ -155,6 +155,9 @@ function fd {
 	fi
 }
 
+# Print out environment variables of a process
+function envps { tr '\0' '\n' < "/proc/${1}/environ" | sort; }
+
 # enable programmable completion features (you don't need to enable
 # this, if it's already enabled in /etc/bash.bashrc and /etc/profile
 # sources /etc/bash.bashrc).

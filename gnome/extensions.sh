@@ -3,8 +3,8 @@
 EXT_ROOTDIR=$( cd -P -- "$(dirname -- "$(command -v -- "$0")")" && pwd -P )
 INSTALL_ROOTDIR=$(dirname "$EXT_ROOTDIR")
 INSTALL_LIBPATH=${INSTALL_LIBPATH:-${INSTALL_ROOTDIR}/lib}
-XDG_DATA_HOME=${XDG_DATA_HOME:-${HOME}/.local/share}
-INSTALL_TARGET=${INSTALL_TARGET:-${XDG_DATA_HOME}/gnome-shell/extensions}
+XDG_DATA_HOME=${XDG_DATA_HOME:-${INSTALL_TARGET}/.local/share}
+GNOME_EXTENSIONS_DIR=${GNOME_EXTENSIONS_DIR:-${XDG_DATA_HOME}/gnome-shell/extensions}
 
 # Look for modules passed as parameters in the INSTALL_LIBPATH and source them.
 # Modules are required so fail as soon as it was not possible to load a module
@@ -28,29 +28,42 @@ module() {
 }
 
 module log controls utils
-if [ -f "${INSTALL_TARGET}/.local/share/gnome-shell/extensions/.unforge" ]; then
-      log_info "Extracting extensions indexed at ${INSTALL_TARGET}/.local/share/gnome-shell/extensions/.unforge"
-      (
-            cd "${INSTALL_TARGET}/.local/share/gnome-shell/extensions"
-            $INSTALL_ROOTDIR/libexec/unforge/unforge.sh -vv -f install -p off
-      )
-else
-      log_warn "No unforge extension index found at ${INSTALL_TARGET}/.local/share/gnome-shell/extensions/.unforge"
-fi
 
-# Recompile schemas on the local machine, see: https://askubuntu.com/questions/1178580/where-are-gnome-extensions-preferences-stored
-log_info "Recompiling schemas"
-find  "${INSTALL_TARGET}/.local/share/gnome-shell/extensions" \
-      -mindepth 1 -maxdepth 1 -type d \
-      -exec glib-compile-schemas "{}/schemas" \; 2>/dev/null
+
+for uuid in \
+  "iso-clock@tweekism.fairchild.au" \
+  "espresso@coadmunkee.github.com" \
+  "freon@UshakovVasilii_Github.yahoo.com" \
+  "ddc-brightness-contrast-extra-dimming@tzawezin.github.io" \
+  "status-area-horizontal-spacing@mathematical.coffee.gmail.com" \
+  "BingWallpaper@ineffable-gmail.com" \
+  "clipboard-indicator@tudmotu.com" \
+  "tilingshell@ferrarodomenico.com" ; do
+  if ! gnome-extensions list | grep -Fq "$uuid"; then
+    log_info "Installing extension ${uuid}"
+    # Note: this will pop up a dialog asking for confirmation
+    gdbus call \
+      --session \
+      --dest org.gnome.Shell.Extensions \
+      --object-path /org/gnome/Shell/Extensions \
+      --method org.gnome.Shell.Extensions.InstallRemoteExtension "$uuid"
+  else
+    log_info "Extension ${uuid} already installed"
+  fi
+done
+
+log_info "For ddc-brightness-contrast-extra-dimming@tzawezin.github.io: see requirements here: https://github.com/tzawezin/gnome-ddc-brightness-contrast-extra-dimming"
+# if [ -f "${GNOME_EXTENSIONS_DIR}/.unforge" ]; then
+#       log_info "Extracting extensions indexed at ${GNOME_EXTENSIONS_DIR}/.unforge"
+#       (
+#             cd "${GNOME_EXTENSIONS_DIR}"
+#             $INSTALL_ROOTDIR/libexec/unforge/unforge.sh -vv -f -p off install
+#       )
+# else
+#       log_warn "No unforge extension index found at ${GNOME_EXTENSIONS_DIR}/.unforge"
+# fi
 
 # Push back the settings from the repo file. This file has to be regenerated
 # everytime some settings, in some extension, change.
 log_info "Enforcing settings"
 dconf load /org/gnome/shell/extensions/ < "${EXT_ROOTDIR}/extensions.dconf"
-
-# Extensions that have been copied into their official locations are disabled by
-# default, this will enable them...
-log_info "Enabling disabled user extensions"
-gnome-extensions list --disabled --user |
-      xargs -r -I '{}' gnome-extensions enable \{\}

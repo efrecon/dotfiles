@@ -1,9 +1,3 @@
-[apt-update-indicator]
-interval-unit='days'
-last-check-date-automatic-double=1589113986068.0
-last-check-date-double=1589113986068.0
-update-cmd-options='update-manager'
-
 [bingwallpaper]
 delete-previous=true
 download-folder='/home/emmanuel/Pictures/BingWallpaper/'
@@ -11,8 +5,8 @@ hide=false
 market='sv-SE'
 previous='/home/emmanuel/Pictures/BingWallpaper/20210313-Rhododendron_ROW6096476187_UHD.jpg,/home/emmanuel/Pictures/BingWallpaper/20210314-LyonAstronomical_ROW2421505709_UHD.jpg,/home/emmanuel/Pictures/BingWallpaper/20210316-BifengxiaPanda_ROW2799579258_UHD.jpg,/home/emmanuel/Pictures/BingWallpaper/20210318-MtEtna_ROW3562920904_UHD.jpg,/home/emmanuel/Pictures/BingWallpaper/20210321-HallesWood_ROW3918494941_UHD.jpg,/home/emmanuel/Pictures/BingWallpaper/20210409-HovenweepDarkSky_ROW3349026852_UHD.jpg,/home/emmanuel/Pictures/BingWallpaper/20210410-SiblingBears_ROW3473081776_UHD.jpg,/home/emmanuel/Pictures/BingWallpaper/20210415-AlbertaTrunks_ROW3515049267_UHD.jpg'
 
-[caffeine]
-user-enabled=false
+[espresso]
+user-enabled=true
 
 [cpupower]
 default-ac-profile=''
@@ -34,34 +28,6 @@ hide-panel-view=true
 panel-menu-label-text=['']
 panel-menu-position='Left'
 
-[gsconnect]
-id='cc759a14-5c8a-4653-8902-5aee5f57d393'
-name='sovrummet'
-
-[gtile]
-animation=true
-global-presets=true
-grid-sizes='9x6,6x4,4x4'
-window-margin=4
-
-[materialshell/layouts]
-default-layout='float'
-gap=4
-half-horizontal=true
-half-vertical=false
-ratio=true
-simple-horizontal=true
-simple-vertical=false
-
-[nightshellswitcher]
-time-source='manual'
-
-[nightthemeswitcher]
-theme-day='Yaru'
-theme-night='Yaru-dark'
-theme-original='Yaru'
-time-source='manual'
-
 [panel-osd]
 force-expand=true
 test-notification=false
@@ -70,12 +36,8 @@ x-pos=100.0
 [soft-brightness]
 current-brightness=1.0
 
-[sound-output-device-chooser]
-new-profile-indentification=false
-ports-settings='{"version":2,"ports":[]}'
-
 [status-area-horizontal-spacing]
-hpadding=3
+hpadding=2
 
 [wbe]
 blur=false
@@ -83,5 +45,5 @@ brightness-and-contrast-set-brightness=-0.42999999999999999
 brightness-and-contrast-set-contrast=-0.19
 desaturate-set-factor=0.91000000000000003
 
-[wintile]
-cols=1
+[moveclock]
+clock-before-statusmenu=true

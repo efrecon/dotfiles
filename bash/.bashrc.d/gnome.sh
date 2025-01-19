@@ -1,3 +1,5 @@
+#!/usr/bin/bash
+
 XDG_DATA_HOME=${XDG_DATA_HOME:-${HOME}/.local/share}
 GNOME_EXTENSIONS_INDEX=${GNOME_EXTENSIONS_INDEX:-${XDG_DATA_HOME}/gnome-shell/extensions/.unforge}
 
@@ -27,6 +29,6 @@ if ps -e | grep -Fq gnome-shell; then
     fi
 else
     (
-        sleep 5 && $HOME/.bashrc.d/gnome.sh
+        sleep 5 && "$HOME/.bashrc.d/gnome.sh"
     ) &
 fi

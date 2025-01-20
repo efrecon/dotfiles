@@ -34,7 +34,7 @@ for uuid in \
   "iso-clock@tweekism.fairchild.au" \
   "caffeine@patapon.info" \
   "freon@UshakovVasilii_Github.yahoo.com" \
-  "ddc-brightness-contrast-extra-dimming@tzawezin.github.io" \
+  "display-brightness-ddcutil@themightydeity.github.com" \
   "status-area-horizontal-spacing@mathematical.coffee.gmail.com" \
   "BingWallpaper@ineffable-gmail.com" \
   "clipboard-indicator@tudmotu.com" \
@@ -52,7 +52,7 @@ for uuid in \
   fi
 done
 
-log_info "For ddc-brightness-contrast-extra-dimming@tzawezin.github.io: see requirements here: https://github.com/tzawezin/gnome-ddc-brightness-contrast-extra-dimming"
+log_info "For ddc-brightness-contrast-extra-dimming@tzawezin.github.io or display-brightness-ddcutil@themightydeity.github.com: see requirements here: https://github.com/tzawezin/gnome-ddc-brightness-contrast-extra-dimming"
 # if [ -f "${GNOME_EXTENSIONS_DIR}/.unforge" ]; then
 #       log_info "Extracting extensions indexed at ${GNOME_EXTENSIONS_DIR}/.unforge"
 #       (

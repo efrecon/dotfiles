@@ -13,7 +13,6 @@ BINENV_BINARIES="act age age-keygen \
                     fx \
                     geesefs gh glab glow gotty gping gron \
                     lazydocker lazygit lsd \
-                    micro \
                     procs \
                     rga \
                     sysz \

@@ -1,0 +1,102 @@
+name: "bin/tar installer"
+description: |
+  Quickly download and install direct binaries, or binaries extracted from tar
+  files. This action makes it easy to install fat binaries (statically compiled,
+  such as golang binaries), picked from known github projects, e.g. kubectl, jq,
+  etc. The destination directory where the binaries are installed (or made
+  available from) is automatically added to the PATH, so that the binaries are
+  automatically made available to other steps.
+author: "Emmanuel Frécon <efrecon+github@gmail.com>"
+
+inputs:
+  installer:
+    description: |
+      Direct binary, or tar extractor installer. Must be one of bin or tar
+    default: bin
+    required: true
+  url:
+    description: |
+      URL at which to find the binary or tar file to install from
+    default: ""
+    required: true
+  destination:
+    description: Destination directory for downloaded binaries
+    default: ${{ runner.tool_cache }}/${{ github.repository }}/bin
+    required: false
+  binary:
+    description: |
+      Name of the binary to place under the destination directory. When empty,
+      this will be the basename of the extraction path.
+    default: ""
+    required: false
+  extract:
+    description: |
+      When the installer type is tar, this is the path, relative the extracted
+      tar where to find the binary to install. When empty, this will be the same
+      as the name of the tar file, without any extension (so .tar.gz, or .tgz
+      removed).
+    default: ""
+    required: false
+  cache:
+    description: |
+      How long should installed binaries with the same name and in the same
+      destination directory, be kept in cache before a new download will be
+      attempted. This is best expressed as a number of seconds, but also
+      supports simple human-readable periods such as 3d or 5 months. The default
+      is to keep binaries for one day.
+    default: 1d
+    required: false
+  package:
+    description: |
+      Path to a directory where to store the entire content of the tar file upon
+      installation. The directory will be created if necessary. When the value
+      of this input is not an empty string, a symbolic link to the binary will
+      be created from the 'destination' directory (with the name 'binary')
+      towards the (relative) path 'extract' under 'package'.
+    default: ""
+    required: false
+
+outputs:
+  path:
+    description: Location of the installed binary, empty on errors.
+    value: ${{ steps.install.outputs.path }}
+
+runs:
+  using: composite
+
+  steps:
+    # Create bin directory to store downloaded binary into.
+    -
+      name: Create cache directory for binaries
+      shell: bash
+      run: mkdir -p ${{ inputs.destination }}
+
+    # Run bininstall.sh or tarinstall.sh with values from the inputs. Both
+    # scripts share almost the same set of command-line options on purpose. Give
+    # tar-specific information via an environment variables as there is no `if`
+    # key in composite actions. Set the output field called path with the result
+    # of the install, i.e. the location of the binary on disk, unless something
+    # wrong happened.
+    -
+      name: Install in destination directory
+      id: install
+      shell: bash
+      env:
+        TARINSTALL_EXTRACT: ${{ inputs.extract }}
+        TARINSTALL_PACKAGE: ${{ inputs.package }}
+      run: |
+        printf '::set-output name=path::%s\n' \
+          "$( ${{ github.action_path }}/${{ inputs.installer }}install.sh \
+                --destination "${{ inputs.destination }}" \
+                --bin "${{ inputs.binary }}" \
+                --keep "${{ inputs.cache }}" \
+                --verbose \
+                -- \
+                  "${{ inputs.url }}" )"
+
+    # Export destination directory into the PATH so callers will be able to call
+    # the binary directly without accessing it via the value of the path output.
+    -
+      name: Export to further actions
+      shell: bash
+      run: echo "${{ inputs.destination }}" >> "$GITHUB_PATH"

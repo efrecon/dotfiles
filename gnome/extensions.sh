@@ -32,7 +32,7 @@ module log controls utils
 
 for uuid in \
   "iso-clock@tweekism.fairchild.au" \
-  "espresso@coadmunkee.github.com" \
+  "caffeine@patapon.info" \
   "freon@UshakovVasilii_Github.yahoo.com" \
   "ddc-brightness-contrast-extra-dimming@tzawezin.github.io" \
   "status-area-horizontal-spacing@mathematical.coffee.gmail.com" \

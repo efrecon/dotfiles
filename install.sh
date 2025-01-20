@@ -121,7 +121,7 @@ distro() {
 }
 
 # Prints out the list of tools in the distribution-specific directory (all or
-# the one matching the patter passed as a parameter). Hopefully, this list
+# the one matching the pattern passed as a parameter). Hopefully, this list
 # should be empty to allow for the same environment on all destination machines.
 distro_tools() {
   if [ -d "${INSTALL_ROOTDIR}/distro/$(distro)" ]; then
@@ -154,6 +154,7 @@ install_tool() {
     # this run (this directory will have a unique name across time (and runs))
     if [ -n "$INSTALL_BACKDIR" ]; then
       log_info "Backing up existing versions of $tool to $INSTALL_BACKDIR"
+      # shellcheck disable=2038 # We are ok
       find "$1" -mindepth 1 -maxdepth 1 \( -name "$INSTALL_DOTFILES" -o -type d \) |
         xargs -r -I '{}' basename \{\} |
         xargs -r -I '{}' cp -a "${INSTALL_TARGET%/}/{}" "$INSTALL_BACKDIR"
@@ -182,6 +183,7 @@ install_tool() {
     if [ -n "$INSTALL_BACKDIR" ]; then
       log_info "Would backup existing versions of $tool to $INSTALL_BACKDIR"
       if at_verbosity trace; then
+        # shellcheck disable=2038 # We are ok
         find "$1" -mindepth 1 -maxdepth 1 \( -name "$INSTALL_DOTFILES" -o -type d \) |
           xargs -r -I '{}' basename \{\} |
           xargs -r -I '{}' echo cp -a "${INSTALL_TARGET%/}/{}" "$INSTALL_BACKDIR" >&2
@@ -208,8 +210,8 @@ install_tool() {
 # INSTALLED and will contain the name of each installed tools, one per line.
 install() {
   while IFS= read -r tool_path; do
-    if printf %s\\n "$INSTALLED" | grep -vq $(basename "$tool_path") && install_tool "$tool_path"; then
-      INSTALLED="${INSTALLED}\n$(basename $tool_path)"
+    if printf %s\\n "$INSTALLED" | grep -vq "$(basename "$tool_path")" && install_tool "$tool_path"; then
+      INSTALLED="${INSTALLED}\n$(basename "$tool_path")"
     fi
   done
 }

@@ -53,15 +53,6 @@ for uuid in \
 done
 
 log_info "For ddc-brightness-contrast-extra-dimming@tzawezin.github.io or display-brightness-ddcutil@themightydeity.github.com: see requirements here: https://github.com/tzawezin/gnome-ddc-brightness-contrast-extra-dimming"
-# if [ -f "${GNOME_EXTENSIONS_DIR}/.unforge" ]; then
-#       log_info "Extracting extensions indexed at ${GNOME_EXTENSIONS_DIR}/.unforge"
-#       (
-#             cd "${GNOME_EXTENSIONS_DIR}"
-#             $INSTALL_ROOTDIR/libexec/unforge/unforge.sh -vv -f -p off install
-#       )
-# else
-#       log_warn "No unforge extension index found at ${GNOME_EXTENSIONS_DIR}/.unforge"
-# fi
 
 # Push back the settings from the repo file. This file has to be regenerated
 # everytime some settings, in some extension, change.

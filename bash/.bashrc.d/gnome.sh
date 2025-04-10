@@ -3,7 +3,7 @@
 XDG_DATA_HOME=${XDG_DATA_HOME:-${HOME}/.local/share}
 GNOME_EXTENSIONS_INDEX=${GNOME_EXTENSIONS_INDEX:-${XDG_DATA_HOME}/gnome-shell/extensions/.unforge}
 
-if ps -e | grep -Fq gnome-shell; then
+if ps -e | grep -Fq gnome-shell | grep -v grep; then
     if [ -f "$GNOME_EXTENSIONS_INDEX" ]; then
         while IFS= read -r line || [ -n "${line:-}" ]; do
             # Skip leading comments and empty lines.

@@ -185,7 +185,7 @@ fi
 if [ -d ~/.bashrc.d ]; then
 	for rc in ~/.bashrc.d/*; do
 		if [ -f "$rc" ]; then
-			. "$rc"
+			. "$rc" || true
 		fi
 	done
 fi

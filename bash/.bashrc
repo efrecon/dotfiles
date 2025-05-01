@@ -190,10 +190,6 @@ if [ -d ~/.bashrc.d ]; then
 	done
 fi
 
-# Source ble.sh if installed and running interactively
-XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
-source "${XDG_DATA_HOME}/blesh/ble.sh"
-
 # Source liquidprompt if installed and running interactively
 if [[ $- = *i* ]] && [[ -f "${HOME}/.local/bin/starship" ]]; then
 	eval "$("$HOME/.local/bin/starship" init bash)"

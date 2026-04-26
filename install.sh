@@ -67,7 +67,7 @@ Usage:
   where all dash-led single options are as follows:
     -t | --target    Target directory, default to \$HOME
     -v | --verbosity One of: error, warn, notice, info, debug or trace
-  
+
   All arguments (possibly after the double-dash separator) will be
   patterns passed to find and matching known tools to install. The
   behaviour is to install ALL known tools when no argument is passed!
@@ -147,6 +147,7 @@ tools() {
 # target.
 install_tool() {
   tool=$(basename "$1")
+  rx_tool=$(printf %s\\n "$1"|sed 's|[^a-zA-Z0-9/]|\\&|g')
 
   if [ "$INSTALL_DRYRUN" = "0" ]; then
     # Backup existing version of the dotfiles and directories having the same
@@ -155,9 +156,18 @@ install_tool() {
     if [ -n "$INSTALL_BACKDIR" ]; then
       log_info "Backing up existing versions of $tool to $INSTALL_BACKDIR"
       # shellcheck disable=2038 # We are ok
-      find "$1" -mindepth 1 -maxdepth 1 \( -name "$INSTALL_DOTFILES" -o -type d \) |
-        xargs -r -I '{}' basename \{\} |
-        xargs -r -I '{}' cp -a "${INSTALL_TARGET%/}/{}" "$INSTALL_BACKDIR"
+      find "$1" -mindepth 1 -maxdepth 1 -name "$INSTALL_DOTFILES" -type f |
+        awk -v target="$rx_tool" '{gsub(target,""); print}' |
+        cut -d/ -f2- |
+        xargs -I '{}' cp -a "${INSTALL_TARGET%/}/{}" "$INSTALL_BACKDIR/{}" >&2
+        # shellcheck disable=2016 # We are ok
+        find "$1" -mindepth 2 -type f |
+          awk -v target="$rx_tool" '{gsub(target,""); print}' |
+          cut -d/ -f2- |
+          xargs -I '{}' sh -c '
+          _copy() { mkdir -p "$(dirname "$2")" && cp -a "$1" "$2"; }
+          _copy "$1/$3" "$2/$3"
+          ' _ "${INSTALL_TARGET%/}" "$INSTALL_BACKDIR" {}
     fi
     # Now Recursively copy all the files that are under the tool's directory
     # into the target directory.
@@ -184,9 +194,18 @@ install_tool() {
       log_info "Would backup existing versions of $tool to $INSTALL_BACKDIR"
       if at_verbosity trace; then
         # shellcheck disable=2038 # We are ok
-        find "$1" -mindepth 1 -maxdepth 1 \( -name "$INSTALL_DOTFILES" -o -type d \) |
-          xargs -r -I '{}' basename \{\} |
-          xargs -r -I '{}' echo cp -a "${INSTALL_TARGET%/}/{}" "$INSTALL_BACKDIR" >&2
+        find "$1" -mindepth 1 -maxdepth 1 -name "$INSTALL_DOTFILES" -type f |
+          awk -v target="$rx_tool" '{gsub(target,""); print}' |
+          cut -d/ -f2- |
+          xargs -I '{}' echo cp -a "${INSTALL_TARGET%/}/{}" "$INSTALL_BACKDIR/{}" >&2
+        # shellcheck disable=2016 # We are ok
+        find "$1" -mindepth 2 -type f |
+          awk -v target="$rx_tool" '{gsub(target,""); print}' |
+          cut -d/ -f2- |
+          xargs -I '{}' sh -c '
+          _copy() { echo mkdir -p "$(dirname "$2")" && echo cp -a "$1" "$2"; }
+          _copy "$1/$3" "$2/$3"
+          ' _ "${INSTALL_TARGET%/}" "$INSTALL_BACKDIR" {} >&2
       fi
     fi
     log_info "Would install $tool from $1 to $INSTALL_TARGET"

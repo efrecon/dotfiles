@@ -181,7 +181,7 @@ elif [ -d "$HOME/.krew" ]; then
 	export PATH=${HOME}/.krew/bin:$PATH
 fi
 
-for d in $HOME/.local/bin $HOME/bin $HOME/.dotnet/tools; do
+for d in $HOME/.local/bin $HOME/bin $HOME/.dotnet/tools $HOME/.distillery/bin; do
 	if [ -d "$d" ] && [[ ":$PATH:" != *":$d:"* ]]; then
 		export PATH="$d:$PATH"
 	fi
